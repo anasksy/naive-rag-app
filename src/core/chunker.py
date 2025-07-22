@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 def chunk_documents(docs: list[Document]) -> list[Document]:
     logger.info(f"Starting to chunk {len(docs)} documents")
     
-    cfg = yaml.safe_load(open("configs/chunking.yml"))
+    with open("configs/chunking.yml") as f:
+        cfg = yaml.safe_load(f)
     logger.debug(f"Loaded chunking config: chunk_size={cfg['chunk_size']}, chunk_overlap={cfg['chunk_overlap']}")
     
     splitter = RecursiveCharacterTextSplitter(
