@@ -38,6 +38,18 @@ def chunk_documents(docs: list[Document]) -> list[Document]:
         logger.debug(f"Document {doc_idx + 1} split into {doc_chunks} chunks")
     
     total_chunk_chars = sum(len(chunk.page_content) for chunk in chunks)
-    logger.info(f"Chunking completed: {len(chunks)} chunks created from {total_original_chars} chars (avg chunk size: {total_chunk_chars // len(chunks) if chunks else 0} chars)")
+    
+    # Calculate average chunk size with robust handling of edge cases
+    if not chunks:
+        avg_chunk_size = 0
+        avg_msg = "no chunks created"
+    elif total_chunk_chars == 0:
+        avg_chunk_size = 0
+        avg_msg = "all chunks empty"
+    else:
+        avg_chunk_size = total_chunk_chars // len(chunks)
+        avg_msg = f"avg chunk size: {avg_chunk_size} chars"
+    
+    logger.info(f"Chunking completed: {len(chunks)} chunks created from {total_original_chars} chars ({avg_msg})")
     
     return chunks
