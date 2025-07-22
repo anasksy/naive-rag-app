@@ -1,37 +1,39 @@
-# Naive Rag Application
+# Naive RAG Application
 
-This application implements the minimal version of a Retrieval-Augmented Generation (RAG) pipeline — covering only the essential steps required to transform documents into indexed chunks and generate answers with context and source citations
+This application implements a modular Retrieval-Augmented Generation (RAG) pipeline — covering the essential steps required to transform documents into indexed chunks and generate answers with context and source citations.
 
 ---
 
 ## 🎯 Features
 
-1. **Ingest documents** (`PDF`, `TXT`, `MD`, `DOCX`)  
-2. **Split into chunks** using a tokenizer (configurable)  
-3. **Embed & index** with HuggingFace or OpenAI embeddings into ChromaDB  
-4. **Retrieve context** via vector similarity  
-5. **Answer generation** via LLM (OpenAI, Groq, HuggingFace)  
+1. **Ingest documents** (`PDF`, `TXT`, `MD`, `DOCX`, `CSV`)  
+2. **Split into chunks** using configurable strategies with LangChain  
+3. **Embed & index** with OpenAI, HuggingFace, or Anthropic embeddings into ChromaDB  
+4. **Retrieve context** via vector similarity with advanced filtering  
+5. **Answer generation** via multiple LLM providers (OpenAI, HuggingFace, Anthropic)  
 6. **Query via UI** (Streamlit) or API (FastAPI)
-7. **CI/CD ready** (with linting, testing, typing via GitHub Actions)
+7. **Comprehensive logging** for debugging and monitoring
+8. **CI/CD ready** with GitHub Actions for testing, linting, and type checking
 
 ---
 
 ## 📦 Tech Stack
 
-| Layer                | Tech / Tool              |
-| -------------------- | ------------------------ |
-| **Backend**          | Python, FastAPI, Uvicorn |
-| **Orchestration**    | LangChain                |
-| **Vector Store**     | ChromaDB                 |
-| **LLM**              | Groq (Llama 3), OpenAI                      |
-**Embedding**|  HuggingFace, OpenAI
-| **Frontend**         | Streamlit                |
-| **Deps & Packaging** | Poetry                   |
-| **Lint & Format**    | Ruff                     |
-| **Testing**          | pytest                   |
-| **Type Checking**    | mypy                     |
-| **Env Management**   | python-dotenv            |
-| **CI/CD**   | GitHub Actions
+| Layer                | Tech / Tool                    |
+| -------------------- | ------------------------------ |
+| **Backend**          | Python, FastAPI, Uvicorn       |
+| **Orchestration**    | LangChain (v0.3+)              |
+| **Vector Store**     | ChromaDB                       |
+| **LLM Providers**    | OpenAI, HuggingFace, Anthropic |
+| **Embedding**        | OpenAI, HuggingFace            |
+| **Frontend**         | Streamlit                      |
+| **Deps & Packaging** | Poetry                         |
+| **Lint & Format**    | Ruff                           |
+| **Testing**          | pytest, pytest-cov             |
+| **Type Checking**    | mypy                           |
+| **Env Management**   | python-dotenv                  |
+| **CI/CD**            | GitHub Actions                 |
+
 ---
 
 ## 🚀 Getting Started
@@ -49,7 +51,7 @@ poetry install
 
 # 4. Copy env template & add keys
 cp .env.example .env
-# → Fill in OPENAI_API_KEY, HF_API_KEY, or GROQ credentials
+# → Fill in OPENAI_API_KEY, HF_API_KEY, or other LLM provider credentials
 
 # 5. Run linting, tests, type-check
 poetry run ruff check . --fix

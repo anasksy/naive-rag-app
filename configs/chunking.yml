@@ -1,0 +1,6 @@
+chunk_size: 450
+chunk_overlap: 50
+separators:
+  - "\n\n"
+  - "\n"
+  - " "
