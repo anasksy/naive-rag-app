@@ -1,0 +1,13 @@
+default: local
+
+local:
+  provider: chroma_local
+  persist_dir: data/chroma
+  collection_name: default
+
+cloud:
+  provider: chroma_cloud
+  api_key_env: CHROMA_API_KEY
+  tenant_env: CHROMA_TENANT
+  database_env: CHROMA_DATABASE
+  collection_name: default
