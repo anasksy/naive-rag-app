@@ -23,9 +23,9 @@ This application implements a modular Retrieval-Augmented Generation (RAG) pipel
 | -------------------- | ------------------------------ |
 | **Backend**          | Python, FastAPI, Uvicorn       |
 | **Orchestration**    | LangChain (v0.3+)              |
-| **Vector Store**     | ChromaDB                       |
+| **Vector Store**     | ChromaDB (local & cloud)       |
 | **LLM Providers**    | OpenAI, HuggingFace, Anthropic |
-| **Embedding**        | OpenAI, HuggingFace            |
+| **Embedding**        | Ollama, HuggingFace   |
 | **Frontend**         | Streamlit                      |
 | **Deps & Packaging** | Poetry                         |
 | **Lint & Format**    | Ruff                           |
@@ -60,3 +60,97 @@ poetry run mypy src
 
 # 6. Launch Streamlit UI
 poetry run streamlit run src/ui/app.py
+```
+
+---
+
+## 🔄 Ingestion Pipeline
+
+This project contains a complete ingestion pipeline for RAG applications:
+
+1. **Document Loading**: Support for PDF, Text, Markdown and other formats
+2. **Chunking**: Configurable text splitting with overlap
+3. **Embedding**: Multiple provider options (Ollama, HuggingFace, OpenAI)
+4. **Vector Storage**: Persistent storage for efficient retrieval
+
+### Embeddings
+
+The application supports the following embedding providers:
+
+- **Ollama (local)**: Runs on your local system
+
+  ```bash
+  # Start Ollama before usage
+  ollama serve
+  # Pull the mxbai-embed-large model if not already available
+  ollama pull mxbai-embed-large
+  ```
+
+- **HuggingFace (cloud)**: Uses the HuggingFace API
+
+  ```bash
+  # Set API token
+  export HF_TOKEN="your-hf-api-token"
+  # Choose HF as provider
+  export EMBED_PROFILE="cloud"
+  ```
+
+### Vector Store
+
+The application supports the following vector store options:
+
+- **Chroma (local)**: Persistent local storage
+
+  ```bash
+  # Default configuration (no environment variable needed)
+  # Or explicitly:
+  export VS_PROFILE="local"
+  ```
+
+- **Chroma Cloud**: For production environments
+
+  ```bash
+  export VS_PROFILE="cloud"
+  export CHROMA_API_KEY="your-chroma-cloud-api-key"
+  ```
+
+### Configuration
+
+All components are configurable via YAML files:
+
+- `configs/chunking.yml`: Chunk size, overlap, separators
+- `configs/embeddings.yml`: Embedding providers and options
+- `configs/vector_store.yml`: Vector store configuration
+
+### Example Usage
+
+```python
+from src.core.loader import load_documents
+from src.core.chunker import chunk_documents
+from src.core.vector_store import embed_and_store, load_vector_store
+
+# Load document
+docs = load_documents("sample.txt")
+# Create chunks
+chunks = chunk_documents(docs)
+# Generate embeddings and store
+db = embed_and_store(chunks)
+# Similarity search
+results = db.similarity_search("your question", k=3)
+```
+
+### Tests
+
+```bash
+# Run unit and integration tests
+poetry run pytest
+# Ollama-dependent tests can be skipped with environment variable
+SKIP_OLLAMA_TESTS=true poetry run pytest
+```
+
+### Architecture
+
+The pipeline follows the classic RAG pattern:
+
+```text
+Documents → Chunking → Embedding → Vector Store → Retrieval → LLM → Answer
