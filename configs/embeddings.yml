@@ -1,0 +1,10 @@
+default: local
+local:
+  provider: ollama
+  model_name: mxbai-embed-large
+  base_url: http://localhost:11434
+
+cloud:
+  provider: huggingface_hub
+  model_name: mxbai-embed-large-v1
+  api_key_env: HF_TOKEN
