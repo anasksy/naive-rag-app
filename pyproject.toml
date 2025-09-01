@@ -24,6 +24,7 @@ langchain-anthropic = "^0.3.17"
 langchain-community = "^0.3.27"
 langchain-ollama = "^0.3.6"
 langchain-chroma = "^0.2.5"
+langchain-google-genai = "^2.0.8"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.12.4"
