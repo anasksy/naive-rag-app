@@ -6,15 +6,16 @@ from src.core.llm import _load_llm_cfg, get_llm
 
 
 def test_load_llm_cfg_defaults():
-    # Patch file IO and yaml parsing; we don't need the open-handle itself
-    with patch("builtins.open"), patch("yaml.safe_load") as mock_yaml:
-        mock_yaml.return_value = {
-            "default": "openai",
-            "openai": {"provider": "openai", "model_name": "gpt-5-nano"},
-        }
-        cfg = _load_llm_cfg()
-        assert cfg["provider"] == "openai"
-        assert cfg["model_name"] == "gpt-5-nano"
+    with patch.dict(os.environ, {}, clear=True):
+        # Patch file IO and yaml parsing; we don't need the open-handle itself
+        with patch("builtins.open"), patch("yaml.safe_load") as mock_yaml:
+            mock_yaml.return_value = {
+                "default": "openai",
+                "openai": {"provider": "openai", "model_name": "gpt-5-nano"},
+            }
+            cfg = _load_llm_cfg()
+            assert cfg["provider"] == "openai"
+            assert cfg["model_name"] == "gpt-5-nano"
 
 
 @patch("src.core.llm.ChatOpenAI")

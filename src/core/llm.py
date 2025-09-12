@@ -5,6 +5,10 @@ from typing import Optional
 import yaml
 from langchain_openai import ChatOpenAI
 from langchain_huggingface import ChatHuggingFace
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except Exception: 
+    ChatGoogleGenerativeAI = None
 
 logger = logging.getLogger(__name__)
 
@@ -63,15 +67,10 @@ def get_llm(model: Optional[str] = None):
         return ChatHuggingFace(repo_id=model_name, token=token)
 
     if provider == "gemini":
-        # Lazy import to avoid editor missing-import warnings until the dep is installed
-        try:
-            from langchain_google_genai import (  # type: ignore[import-not-found]
-                ChatGoogleGenerativeAI,
-            )
-        except Exception as e:  # pragma: no cover
+        if ChatGoogleGenerativeAI is None:
             raise ImportError(
-                "langchain-google-genai not installed. Run `poetry install`."
-            ) from e
+                "langchain-google-genai not installed. Add it to dependencies."
+            )
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise EnvironmentError("GOOGLE_API_KEY missing. Set it in your environment.")
