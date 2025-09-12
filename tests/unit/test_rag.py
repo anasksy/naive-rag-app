@@ -24,7 +24,7 @@ def test_answer_happy_path(mock_get_llm, mock_get_retriever):
     doc1 = MagicMock(page_content="foo", metadata={"source": "a.txt", "chunk": 0})
     doc2 = MagicMock(page_content="bar", metadata={"source": "b.txt", "chunk": 1})
     retriever = MagicMock()
-    retriever.get_relevant_documents.return_value = [doc1, doc2]
+    retriever.invoke.return_value = [doc1, doc2]
     mock_get_retriever.return_value = retriever
 
     # Mock LLM
@@ -40,7 +40,7 @@ def test_answer_happy_path(mock_get_llm, mock_get_retriever):
         {"source": "b.txt", "chunk": 1},
     ]
     mock_get_retriever.assert_called_once_with(k=3)
-    retriever.get_relevant_documents.assert_called_once()
+    retriever.invoke.assert_called_once()
     llm.invoke.assert_called_once()
 
 
@@ -48,7 +48,7 @@ def test_answer_happy_path(mock_get_llm, mock_get_retriever):
 @patch("src.core.rag.get_llm")
 def test_answer_no_docs_returns_message(mock_get_llm, mock_get_retriever):
     retriever = MagicMock()
-    retriever.get_relevant_documents.return_value = []
+    retriever.invoke.return_value = []
     mock_get_retriever.return_value = retriever
 
     res = answer("question?")

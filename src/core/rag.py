@@ -33,7 +33,11 @@ def answer(query: str, k: int = 4) -> Dict[str, object]:
     """
     retriever = get_retriever(k=k)
     logger.info(f"Retrieving top-{k} documents for query: {query!r}")
-    docs = retriever.get_relevant_documents(query)
+    # Prefer modern LangChain retriever API; fall back if needed
+    if hasattr(retriever, "invoke"):
+        docs = retriever.invoke(query)
+    else:  # pragma: no cover - legacy path
+        docs = retriever.get_relevant_documents(query)
 
     if not docs:
         return {"answer": "No relevant information found.", "sources": []}

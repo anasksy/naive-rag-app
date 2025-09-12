@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langchain_huggingface import ChatHuggingFace
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI
-except Exception: 
+except Exception:
     ChatGoogleGenerativeAI = None
 
 logger = logging.getLogger(__name__)
