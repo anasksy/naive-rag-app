@@ -60,6 +60,17 @@ poetry run mypy src
 
 # 6. Launch Streamlit UI
 poetry run streamlit run src/ui/app.py
+
+# 7. Launch FastAPI service
+poetry run uvicorn src.api.app:app --reload
+```
+
+Once the API is live you can query it, for example with `curl`:
+
+```bash
+curl -X POST http://127.0.0.1:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What does the pipeline do?", "top_k": 4}'
 ```
 
 ---
