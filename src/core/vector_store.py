@@ -6,7 +6,7 @@ import yaml
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
 
-from .embedder import get_embedder
+from src.core.embedder import get_embedder
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def embed_and_store(docs: List[Document]) -> Chroma:
         )
     elif provider == "chroma_cloud":
         logger.info(f"Embedding {len(docs)} docs -> chroma_cloud ({collection})")
-        # Kein persist_directory bei Cloud
+        # No persist_directory when using cloud
         db = Chroma.from_documents(
             documents=docs,
             embedding=emb,
