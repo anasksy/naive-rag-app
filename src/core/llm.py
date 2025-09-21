@@ -1,14 +1,17 @@
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional
 
 import yaml
-from langchain_openai import ChatOpenAI
 from langchain_huggingface import ChatHuggingFace
+from langchain_openai import ChatOpenAI
+
 try:
-    from langchain_google_genai import ChatGoogleGenerativeAI
-except Exception:
-    ChatGoogleGenerativeAI = None
+    from langchain_google_genai import ChatGoogleGenerativeAI as _ChatGoogleGenerativeAI
+except ImportError:
+    _ChatGoogleGenerativeAI = None
+
+ChatGoogleGenerativeAI: Any = _ChatGoogleGenerativeAI
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +52,17 @@ def get_llm(model: Optional[str] = None):
     cfg = _load_llm_cfg()
     provider = cfg.get("provider", "openai")
     # Priority: explicit arg > config
-    model_name = model or cfg.get("model_name")
+    candidate_model = model or cfg.get("model_name")
+    if not isinstance(candidate_model, str) or not candidate_model:
+        raise ValueError("LLM model name must be a non-empty string in configuration")
+    model_name = candidate_model
 
     if provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise EnvironmentError("OPENAI_API_KEY missing. Set it in your environment.")
+            raise EnvironmentError(
+                "OPENAI_API_KEY missing. Set it in your environment."
+            )
         logger.info(f"Using OpenAI Chat model: {model_name}")
         # ChatOpenAI reads api key from env; we pass model only
         return ChatOpenAI(model=model_name)
@@ -67,14 +75,16 @@ def get_llm(model: Optional[str] = None):
         return ChatHuggingFace(repo_id=model_name, token=token)
 
     if provider == "gemini":
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise EnvironmentError(
+                "GOOGLE_API_KEY missing. Set it in your environment."
+            )
+        logger.info(f"Using Gemini Chat model: {model_name}")
         if ChatGoogleGenerativeAI is None:
             raise ImportError(
                 "langchain-google-genai not installed. Add it to dependencies."
             )
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            raise EnvironmentError("GOOGLE_API_KEY missing. Set it in your environment.")
-        logger.info(f"Using Gemini Chat model: {model_name}")
         # ChatGoogleGenerativeAI reads GOOGLE_API_KEY from env
         return ChatGoogleGenerativeAI(model=model_name)
 
