@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from src.core.ingestion import ingest_files, store_uploaded_file
 from src.core.rag import answer
+from src.core.vector_store import delete_by_source
 
 load_dotenv()
 st.set_page_config(page_title="Naive RAG", layout="wide")
@@ -17,8 +18,9 @@ st.set_page_config(page_title="Naive RAG", layout="wide")
 def _init_session_state() -> None:
     st.session_state.setdefault("chat_history", [])
     st.session_state.setdefault("upload_summary", None)
-    st.session_state.setdefault("top_k", 4)
+    st.session_state.setdefault("top_k", 8)
     st.session_state.setdefault("processed_upload_signatures", set())
+    st.session_state.setdefault("stored_uploads", {})
 
 
 def _get_processed_signatures() -> set[str]:
@@ -28,6 +30,39 @@ def _get_processed_signatures() -> set[str]:
     restored = set(processed or [])
     st.session_state.processed_upload_signatures = restored
     return restored
+
+
+def _get_stored_uploads() -> Dict[str, str]:
+    stored = st.session_state.get("stored_uploads")
+    if isinstance(stored, dict):
+        return stored
+    restored = dict(stored or {})
+    st.session_state.stored_uploads = restored
+    return restored
+
+
+def _remove_missing_uploads(current_signatures: set[str]) -> None:
+    stored_uploads = _get_stored_uploads()
+    processed = _get_processed_signatures()
+    removed = [
+        signature for signature in stored_uploads if signature not in current_signatures
+    ]
+    for signature in removed:
+        path_str = stored_uploads.get(signature)
+        file_path = Path(path_str) if path_str else None
+        deletion_error = None
+        if file_path:
+            try:
+                file_path.unlink(missing_ok=True)
+            except Exception as exc:
+                deletion_error = exc
+        if deletion_error:
+            st.sidebar.warning(f"Failed to delete '{file_path.name}': {deletion_error}")
+        else:
+            stored_uploads.pop(signature, None)
+            if file_path:
+                delete_by_source(str(file_path))
+        processed.discard(signature)
 
 
 def _collect_upload_payloads(uploads) -> List[Dict[str, Any]]:
@@ -56,9 +91,11 @@ def _collect_upload_payloads(uploads) -> List[Dict[str, Any]]:
 
 def _ingest_payloads(payloads: List[Dict[str, Any]]):
     saved_paths: List[Path] = []
+    stored_uploads = _get_stored_uploads()
     for payload in payloads:
         stored = store_uploaded_file(payload["data"], payload["name"])
         saved_paths.append(stored)
+        stored_uploads[payload["signature"]] = str(stored)
 
     summary = ingest_files(saved_paths)
     st.session_state.upload_summary = summary
@@ -107,6 +144,8 @@ def _render_sidebar() -> List[Dict[str, Any]]:
     )
 
     payloads = _collect_upload_payloads(uploads)
+    current_signatures = {payload["signature"] for payload in payloads}
+    _remove_missing_uploads(current_signatures)
 
     if uploads:
         st.sidebar.caption(

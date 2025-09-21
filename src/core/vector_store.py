@@ -1,10 +1,11 @@
 import logging
 import os
+from pathlib import Path
 from typing import List
 
 import yaml
-from langchain_core.documents import Document
 from langchain_chroma import Chroma
+from langchain_core.documents import Document
 
 from src.core.embedder import get_embedder
 
@@ -89,3 +90,42 @@ def load_vector_store() -> Chroma:
         )
     else:
         raise ValueError(f"Unknown vector store provider: {provider}")
+
+
+def delete_by_source(source_path: str) -> None:
+    """Remove documents from the vector store matching the given source path."""
+    if not source_path:
+        return
+
+    vcfg = _load_vs_cfg()
+    provider = vcfg.get("provider", "chroma_local")
+    collection = vcfg.get("collection_name", "default")
+
+    emb = get_embedder()
+
+    if provider == "chroma_local":
+        persist_dir = vcfg["persist_dir"]
+        db = Chroma(
+            persist_directory=persist_dir,
+            collection_name=collection,
+            embedding_function=emb,
+        )
+    elif provider == "chroma_cloud":
+        db = Chroma(
+            collection_name=collection,
+            embedding_function=emb,
+        )
+    else:
+        raise ValueError(f"Unknown vector store provider: {provider}")
+
+    candidates = {source_path}
+    try:
+        candidates.add(str(Path(source_path).resolve()))
+    except Exception:
+        pass
+
+    try:
+        for candidate in candidates:
+            db.delete(where={"source": candidate})
+    except Exception:
+        logger.exception("Failed to delete documents for source %s", source_path)
