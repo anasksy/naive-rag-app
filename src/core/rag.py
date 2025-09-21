@@ -1,32 +1,42 @@
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List, TypedDict
 
 from langchain_core.documents import Document
 
-from .retriever import get_retriever
-from .llm import get_llm
+from src.core.retriever import get_retriever
+from src.core.llm import get_llm
 
 logger = logging.getLogger(__name__)
 
 
-def _format_sources(docs: List[Document]) -> List[Dict[str, str]]:
-    sources: List[Dict[str, str]] = []
+class SourceInfo(TypedDict, total=False):
+    source: str
+    chunk: int
+
+
+def _format_sources(docs: List[Document]) -> List[SourceInfo]:
+    sources: List[SourceInfo] = []
     for d in docs:
-        src = str(d.metadata.get("source", "unknown"))
-        ch = d.metadata.get("chunk")
-        sources.append({"source": src, "chunk": ch})
+        metadata = d.metadata or {}
+        src_value = metadata.get("source", "unknown")
+        source = src_value if isinstance(src_value, str) else str(src_value)
+        source_item: SourceInfo = {"source": source}
+        chunk_value = metadata.get("chunk")
+        if isinstance(chunk_value, int):
+            source_item["chunk"] = chunk_value
+        sources.append(source_item)
     return sources
 
 
 def _build_prompt(context: str, question: str) -> str:
     return (
-        "Answer concisely and factually using the provided context. "
-        "If the context does not contain the answer, say you don't know.\n\n"
+        "Answer factually using the provided context and elaborate with necessary detail. "
+        "If the context does not contain the answer, explicitly say you don't know.\n\n"
         f"Context:\n{context}\n\nQuestion: {question}\nAnswer:"
     )
 
 
-def answer(query: str, k: int = 4) -> Dict[str, object]:
+def answer(query: str, k: int = 4) -> Dict[str, Any]:
     """Minimal RAG call: Retriever -> Prompt -> LLM -> Answer + Sources.
 
     Returns a dict: {"answer": str, "sources": [{"source": str, "chunk": int}]}

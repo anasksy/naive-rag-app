@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional, Sequence
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.core.rag import answer
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 app = FastAPI(
     title="Naive RAG API",
@@ -49,8 +52,20 @@ def run_query(payload: QueryRequest) -> QueryResponse:
         logger.exception("RAG pipeline failed")
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    sources = [SourceItem(**s) for s in rag_result.get("sources", [])]
-    return QueryResponse(answer=rag_result.get("answer", ""), sources=sources)
+    raw_sources: Any = rag_result.get("sources", [])
+    sources_payload: Sequence[dict[str, Any]]
+    if isinstance(raw_sources, Sequence) and not isinstance(raw_sources, (str, bytes)):
+        sources_payload = [dict(item) for item in raw_sources]
+    else:
+        sources_payload = []
+
+    sources = [SourceItem(**item) for item in sources_payload]
+
+    answer_text = rag_result.get("answer", "")
+    if not isinstance(answer_text, str):
+        answer_text = str(answer_text)
+
+    return QueryResponse(answer=answer_text, sources=sources)
 
 
 __all__ = [
