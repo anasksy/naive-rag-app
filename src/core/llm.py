@@ -6,10 +6,10 @@ import yaml
 from langchain_huggingface import ChatHuggingFace
 from langchain_openai import ChatOpenAI
 
-try:
+try:  # pragma: no cover - optional dependency
     from langchain_google_genai import ChatGoogleGenerativeAI as _ChatGoogleGenerativeAI
-except ImportError:
-    _ChatGoogleGenerativeAI = None
+except ImportError:  # pragma: no cover - optional dependency
+    _ChatGoogleGenerativeAI = None  # type: ignore[assignment]
 
 ChatGoogleGenerativeAI: Any = _ChatGoogleGenerativeAI
 

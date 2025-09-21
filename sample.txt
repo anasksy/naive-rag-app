@@ -1,0 +1,2 @@
+Short test text about RAG and embeddings.
+It is used for local testing of the pipeline.
