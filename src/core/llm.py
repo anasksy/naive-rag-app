@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import yaml
 from langchain_huggingface import ChatHuggingFace
@@ -9,9 +9,9 @@ from langchain_openai import ChatOpenAI
 try:  # pragma: no cover - optional dependency
     from langchain_google_genai import ChatGoogleGenerativeAI as _ChatGoogleGenerativeAI
 except ImportError:  # pragma: no cover - optional dependency
-    _ChatGoogleGenerativeAI = None  # type: ignore[assignment]
+    _ChatGoogleGenerativeAI = None
 
-ChatGoogleGenerativeAI: Any = _ChatGoogleGenerativeAI
+ChatGoogleGenerativeAI = cast(Any, _ChatGoogleGenerativeAI)
 
 logger = logging.getLogger(__name__)
 

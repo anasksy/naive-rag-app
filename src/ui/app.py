@@ -50,6 +50,7 @@ def _remove_missing_uploads(current_signatures: set[str]) -> None:
     for signature in removed:
         path_str = stored_uploads.get(signature)
         file_path = Path(path_str) if path_str else None
+        display_name = file_path.name if file_path else (Path(path_str).name if path_str else "unknown")
         deletion_error = None
         if file_path:
             try:
@@ -57,7 +58,7 @@ def _remove_missing_uploads(current_signatures: set[str]) -> None:
             except Exception as exc:
                 deletion_error = exc
         if deletion_error:
-            st.sidebar.warning(f"Failed to delete '{file_path.name}': {deletion_error}")
+            st.sidebar.warning(f"Failed to delete '{display_name}': {deletion_error}")
         else:
             stored_uploads.pop(signature, None)
             if file_path:
