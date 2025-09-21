@@ -20,8 +20,8 @@ def _format_sources(docs: List[Document]) -> List[Dict[str, str]]:
 
 def _build_prompt(context: str, question: str) -> str:
     return (
-        "Answer concisely and factually using the provided context. "
-        "If the context does not contain the answer, say you don't know.\n\n"
+        "Answer factually using the provided context and elaborate with necessary detail. "
+        "If the context does not contain the answer, explicitly say you don't know.\n\n"
         f"Context:\n{context}\n\nQuestion: {question}\nAnswer:"
     )
 
