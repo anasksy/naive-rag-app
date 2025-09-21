@@ -4,7 +4,7 @@ from typing import Optional
 
 from langchain_core.retrievers import BaseRetriever
 
-from .vector_store import load_vector_store
+from src.core.vector_store import load_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -29,4 +29,3 @@ def get_retriever(k: Optional[int] = None) -> BaseRetriever:
     db = load_vector_store()
     logger.info(f"Creating retriever: type={search_type}, k={top_k}")
     return db.as_retriever(search_type=search_type, search_kwargs={"k": top_k})
-

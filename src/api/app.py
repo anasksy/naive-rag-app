@@ -3,12 +3,15 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.core.rag import answer
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 app = FastAPI(
     title="Naive RAG API",

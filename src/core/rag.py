@@ -3,8 +3,8 @@ from typing import Dict, List
 
 from langchain_core.documents import Document
 
-from .retriever import get_retriever
-from .llm import get_llm
+from src.core.retriever import get_retriever
+from src.core.llm import get_llm
 
 logger = logging.getLogger(__name__)
 
