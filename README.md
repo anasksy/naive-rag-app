@@ -133,6 +133,19 @@ All components are configurable via YAML files:
 - `configs/embeddings.yml`: Embedding providers and options
 - `configs/vector_store.yml`: Vector store configuration
 
+### Streamlit UI
+
+```bash
+poetry run streamlit run src/ui/app.py
+```
+
+**Workflow**
+
+- Sidebar: Upload (`pdf`, `txt`, `md`, `docx`, `csv`). Originals are stored under `data/uploads/`.
+- Progress: The app shows per-file status for load/chunk/embed/store steps.
+- Chat: Ask questions, adjust `top_k` in the sidebar, and get answers with sources.
+- Reset: Clear chat history from the sidebar.
+
 ### Example Usage
 
 ```python
